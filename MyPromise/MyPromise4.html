@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>手写promise</title>
+</head>
+<body>
+<ol>
+    <li>实现一个promise，在 setTimeout 中去 resolve</li>
+    <li>实现一个promise，直接同步 resolve</li>
+    <li>实现一个promise，防止 resolve 多次</li>
+    <li>实现一个promise，可以让 then 方法链式调用</li>
+</ol>
+<script>
+    const PENDING = "PENDING";
+    const FULFILLED = "FULFILLED";
+    const REJECTED = "REJECTED";
+
+    class MyPromise{
+        constructor(fn) {
+            this.state = PENDING;
+            this.value = undefined;
+            this.resolveCallbacks = [];
+
+            const resolve = val => {
+                setTimeout(() => {
+                    // 只有第一个resolve生效
+                    if(this.state === PENDING){
+                        this.state = FULFILLED;
+                        this.value = val;
+                        this.resolveCallbacks.map(fn => fn(val));
+                    }
+                })
+            }
+
+            const reject = val => {
+                this.state = REJECTED;
+                this.value = val;
+            }
+
+            fn(resolve,reject);
+        }
+
+        then(onFulfilled){
+            if(this.state === PENDING){
+                return new MyPromise((resolve,reject) => {
+                   this.resolveCallbacks.push(() => {
+                       const x = onFulfilled(this.value);
+                       resolve(x);
+                   })
+                })
+            }
+        }
+    }
+
+    new MyPromise((resolve,reject) => {
+        resolve('step4');
+        resolve('step4.1');
+    }).then(res => {
+        console.log(res);
+        return "step4.2"
+    }).then(res => {
+        console.log(res);
+    });
+</script>
+</body>
+</html>

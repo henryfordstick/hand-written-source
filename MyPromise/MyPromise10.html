@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>手写promise</title>
+</head>
+<body>
+<ol>
+    <li>实现一个promise，在 setTimeout 中去 resolve</li>
+    <li>实现一个promise，直接同步 resolve</li>
+    <li>实现一个promise，防止 resolve 多次</li>
+    <li>实现一个promise，可以让 then 方法链式调用</li>
+    <li>实现一个promise，支持空 then 函数</li>
+    <li>实现一个promise，支持 then 传递 thenable 对象</li>
+    <li>实现一个promise，支持 then 传递 promise 对象</li>
+    <li>实现一个promise，支持 resolve 传递 promise 对象</li>
+    <li>实现一个promise，处理 then 中的循环 promise</li>
+    <li>实现一个promise，支持静态方法 Promise.all</li>
+</ol>
+<script>
+    const PENDING = "PENDING";
+    const FULFILLED = "FULFILLED";
+    const REJECTED = "REJECTED";
+
+    const promiseResolutionProcedure = (promise2,x,resolve,reject) => {
+        if(promise2 === x){
+            throw new Error('循环引用promise');
+        }
+
+        // 处理promise对象
+        if(x instanceof MyPromise){
+            if(x.state === PENDING){
+                x.then(y => {
+                    promiseResolutionProcedure(promise2,y,resolve,reject);
+                },reject)
+            } else {
+                x.state === FULFILLED && resolve(x.value);
+                x.state === REJECTED && reject(x.value);
+            }
+        }
+        // 判断thenable对象
+        if((typeof x === "object" || typeof x === "function") && x !== null){
+            if(typeof x.then === "function"){
+                x.then(y => {
+                    promiseResolutionProcedure(promise2,y,resolve,reject);
+                },reject);
+            } else {
+                resolve(x);
+            }
+        } else {
+            resolve(x);
+        }
+    }
+
+    class MyPromise{
+        static all(promiseArray){
+            if(!Array.isArray(promiseArray)) throw new Error('输入参数必须是数组');
+
+            return new MyPromise((resolve,reject) => {
+                const resultArray = [];
+                let successTimes = 0;
+                
+                function processResult(index,data) {
+                    resultArray[index] = data;
+                    successTimes ++;
+                    if(successTimes === promiseArray.length){
+                        // 处理成功
+                        resolve(resultArray);
+                    }
+                }
+
+                for (let i = 0; i < promiseArray.length; i++){
+                    promiseArray[i].then(res => {
+                        processResult(i,res);
+                    },err => {
+                        // 处理失败
+                        reject(err)
+                    })
+                }
+            })
+        }
+
+
+        constructor(fn) {
+            this.state = PENDING;
+            this.value = undefined;
+            this.resolveCallbacks = [];
+
+            const resolve = val => {
+                if((typeof val === "object" || typeof val === "function") && val.then){
+                    promiseResolutionProcedure(this,val,resolve,reject);
+                    return;
+                }
+                setTimeout(() => {
+                    // 只有第一个resolve生效
+                    if(this.state === PENDING){
+                        this.state = FULFILLED;
+                        this.value = val;
+                        this.resolveCallbacks.map(fn => fn(val));
+                    }
+                })
+            }
+
+            const reject = val => {
+                this.state = REJECTED;
+                this.value = val;
+            }
+
+            fn(resolve,reject);
+        }
+
+        then(onFulfilled = val => val){
+            if(this.state === PENDING){
+                const promise2 =  new MyPromise((resolve,reject) => {
+                    this.resolveCallbacks.push(() => {
+                        const x = onFulfilled(this.value);
+                        promiseResolutionProcedure(promise2,x,resolve,reject)
+                    })
+                });
+
+                return promise2;
+
+            }
+        }
+    }
+
+
+
+    MyPromise.all([
+        new MyPromise(resolve => {
+            resolve(1);
+        }),
+        new MyPromise(resolve => {
+            resolve(2);
+        })
+    ]).then(res => {
+        console.log(res);
+    })
+</script>
+</body>
+</html>

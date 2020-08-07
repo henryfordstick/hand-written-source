@@ -4,12 +4,12 @@
  * @param wait 间隔时间
  */
 function throttle1(fn,wait) {
-    let previous = 0;
-
+    let prev = new Date();
     return (...args) => {
-        let now = Date.now();
-        if(now - previous > wait){
+        const now = new Date();
+        if(now - prev >= wait){
             fn.apply(this,args);
+            prev  = new Date();
         }
     }
 }

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>drag</title>
+  <style>
+    #box{
+      height: 100px;
+      width: 100px;
+      background-color: red;
+      border: 1px solid #666;
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="box"></div>
+  <script>
+    window.onload = function(){
+      // drag处于绝对定位状态
+      let dragObj = document.getElementById('box');
+      dragObj.onmousedown = function(e){
+        console.log(121);
+        var e = e || window.event;
+        // 鼠标与拖拽元素边界的距离 = 鼠标与可视区边界的距离 - 拖拽元素与边界的距离
+        let diffX = e.clientX - dragObj.offsetLeft;
+        let diffY = e.clientY - dragObj.offsetTop;
+        dragObj.onmousemove = function (e) {
+          // 拖拽元素移动的距离 = 鼠标与可视区边界的距离 - 鼠标与拖拽元素边界的距离
+          let left = e.clientX - diffX;
+          let top = e.clientY - diffY;
+          // 避免拖拽出可视区
+          if(left < 0){
+            left = 0;
+          } else if(left > window.innerWidth - dragObj.offsetWidth){
+            left = window.innerWidth - dragObj.offsetWidth;
+          }
+
+          if(top < 0){
+            top = 0;
+          } else if(top > window.innerHeight - dragObj.offsetHeight){
+            top = window.innerHeight - dragObj.offsetHeight;
+          }
+
+          dragObj.style.left = left + "px";
+          dragObj.style.top = top + "px";
+        };
+        dragObj.onmouseup = function(e){
+          this.onmousemove = null;
+          this.onmouseup = null;
+        }
+
+      }
+    }
+  </script>
+</body>
+</html>

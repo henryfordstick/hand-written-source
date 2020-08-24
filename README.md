@@ -73,4 +73,12 @@ bind 会创建⼀个新函数。当这个新函数被调⽤时，bind() 的第�
 
 那么反柯里化函数，从字面讲，意义和用法跟函数柯里化相比正好相反，扩大适用范围，创建一个应用范围更广的函数。使本来只有特定对象才适用的方法，扩展到更多的对象。
 
+### 八、[手写js深拷贝](deepCopy.js)
+### 九、[手写instanceOf原理](instanceof.js)
+### 十、[手写map和reduce]()
+### 十一、[手写实现拖拽](drag.html)
 
+### 十二、[使用setTimeout模拟setInterval](setInterval.js)
+可避免setInterval因执行时间导致的间隔执行时间不一致
+### 十三、[手写实现Object.create()的基本原理](create.js)
+将传入的对象作为原型

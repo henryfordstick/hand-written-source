@@ -40,3 +40,25 @@ let curryTest = currying((a, b, c, d) => a + b + c + d);
 curryTest(1, 2, 3)(4); //返回10
 curryTest(1, 2)(4)(3); //返回10
 curryTest(1, 2)(3, 4); //返回10
+
+
+
+Function.prototype.uncurrying = function() {
+  var that = this;
+  return function() {
+    return Function.prototype.call.apply(that, arguments);
+  };
+};
+var uncurrying = function(fn) {
+  return function() {
+    var args = [].slice.call(arguments, 1);
+    return fn.apply(arguments[0], args);
+  };
+};
+Function.prototype.uncurring = function() {
+  var self = this;
+  return function() {
+    var obj = Array.prototype.shift.call(arguments);
+    return self.apply(obj, arguments);
+  };
+};

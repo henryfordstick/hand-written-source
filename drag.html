@@ -25,32 +25,36 @@
       // drag处于绝对定位状态
       let dragObj = document.getElementById('box');
       dragObj.onmousedown = function(e){
-        console.log(121);
         var e = e || window.event;
         // 鼠标与拖拽元素边界的距离 = 鼠标与可视区边界的距离 - 拖拽元素与边界的距离
+        let dragging = true;
         let diffX = e.clientX - dragObj.offsetLeft;
         let diffY = e.clientY - dragObj.offsetTop;
-        dragObj.onmousemove = function (e) {
+        document.onmousemove = function (e) {
+          var e = e || window.event;
           // 拖拽元素移动的距离 = 鼠标与可视区边界的距离 - 鼠标与拖拽元素边界的距离
-          let left = e.clientX - diffX;
-          let top = e.clientY - diffY;
-          // 避免拖拽出可视区
-          if(left < 0){
-            left = 0;
-          } else if(left > window.innerWidth - dragObj.offsetWidth){
-            left = window.innerWidth - dragObj.offsetWidth;
-          }
+          if(dragging){
+            let left = e.clientX - diffX;
+            let top = e.clientY - diffY;
+            // 避免拖拽出可视区
+            if(left < 0){
+              left = 0;
+            } else if(left > window.innerWidth - dragObj.offsetWidth){
+              left = window.innerWidth - dragObj.offsetWidth;
+            }
 
-          if(top < 0){
-            top = 0;
-          } else if(top > window.innerHeight - dragObj.offsetHeight){
-            top = window.innerHeight - dragObj.offsetHeight;
-          }
+            if(top < 0){
+              top = 0;
+            } else if(top > window.innerHeight - dragObj.offsetHeight){
+              top = window.innerHeight - dragObj.offsetHeight;
+            }
 
-          dragObj.style.left = left + "px";
-          dragObj.style.top = top + "px";
+            dragObj.style.left = left + "px";
+            dragObj.style.top = top + "px";
+          }
         };
-        dragObj.onmouseup = function(e){
+        document.onmouseup = function(e){
+          dragging = false;
           this.onmousemove = null;
           this.onmouseup = null;
         }
